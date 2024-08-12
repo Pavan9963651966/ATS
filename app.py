@@ -93,18 +93,37 @@ input_text = st.text_area("Job Description:", key="input", height=150)
 # File uploader for the resume PDF
 uploaded_file = st.file_uploader("Upload your resume (PDF only)...", type=["pdf"])
 
-# Prompts for the AI
-input_prompt1 = """
-You are an experienced Technical Human Resource Manager, your task is to review the provided resume against the job description. 
-Please share your professional evaluation on whether the candidate's profile aligns with the role. 
-Highlight the strengths and weaknesses of the applicant in relation to the specified job requirements.
-"""
+# Role selection
+role = st.selectbox("Select the Role:", ["Data Scientist", "Software Engineer", "Product Manager", "Marketing Specialist", "Sales Executive", "Other"])
 
-input_prompt3 = """
-You are a skilled ATS (Applicant Tracking System) scanner with a deep understanding of data science and ATS functionality. 
-Your task is to evaluate the resume against the provided job description. 
-Give me the percentage match if the resume matches the job description. First, the output should come as a percentage, then keywords missing, and lastly, final thoughts.
-"""
+# Role-specific prompts
+prompts = {
+    "Data Scientist": {
+        "evaluation": """
+        You are an experienced Technical Human Resource Manager, your task is to review the provided resume against the job description for a Data Scientist role. 
+        Please share your professional evaluation on whether the candidate's profile aligns with the role. 
+        Highlight the strengths and weaknesses of the applicant in relation to the specified job requirements.
+        """,
+        "percentage_match": """
+        You are an ATS scanner with a deep understanding of data science and ATS functionality. 
+        Evaluate the resume against the provided job description and give the percentage match. 
+        First, provide the percentage match, then list keywords missing, and finally, give your final thoughts.
+        """
+    },
+    "Software Engineer": {
+        "evaluation": """
+        You are an experienced Technical Human Resource Manager, your task is to review the provided resume against the job description for a Software Engineer role. 
+        Please share your professional evaluation on whether the candidate's profile aligns with the role. 
+        Highlight the strengths and weaknesses of the applicant in relation to the specified job requirements.
+        """,
+        "percentage_match": """
+        You are an ATS scanner with a deep understanding of software engineering and ATS functionality. 
+        Evaluate the resume against the provided job description and give the percentage match. 
+        First, provide the percentage match, then list keywords missing, and finally, give your final thoughts.
+        """
+    },
+    # Add similar prompts for other roles
+}
 
 # Buttons for different actions
 col1, col2 = st.columns(2)
@@ -117,7 +136,7 @@ with col2:
 if submit1 and uploaded_file is not None:
     try:
         pdf_content = input_pdf_setup(uploaded_file)
-        response = get_gemini_response(input_text, pdf_content, input_prompt1)
+        response = get_gemini_response(input_text, pdf_content, prompts[role]["evaluation"])
         st.subheader("The Response is")
         st.write(response)
     except Exception as e:
@@ -129,7 +148,7 @@ elif submit1:
 if submit3 and uploaded_file is not None:
     try:
         pdf_content = input_pdf_setup(uploaded_file)
-        response = get_gemini_response(input_text, pdf_content, input_prompt3)
+        response = get_gemini_response(input_text, pdf_content, prompts[role]["percentage_match"])
         st.subheader("The Response is")
         st.write(response)
     except Exception as e:
